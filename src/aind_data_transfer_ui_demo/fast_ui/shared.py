@@ -29,7 +29,7 @@ def page(
             c.Link(
                 components=[c.Text(text="Submit Jobs")],
                 # default to an option
-                on_click=GoToEvent(url="/forms/select"),
+                on_click=GoToEvent(url="/forms/login"),
                 active="startswith:/forms",
             ),
             c.Link(

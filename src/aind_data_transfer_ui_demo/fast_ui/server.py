@@ -2,9 +2,11 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import HTMLResponse
 from fastui import AnyComponent, FastUI, prebuilt_html
 
+from aind_data_transfer_ui_demo.fast_ui.routers.forms import router as forms_router
 from aind_data_transfer_ui_demo.fast_ui.routers.users import (
     router as user_router,
 )
+
 from aind_data_transfer_ui_demo.fast_ui.shared import APP_TITLE, page
 
 # MAIN #######################
@@ -31,6 +33,7 @@ async def api_404():
 
 app = FastAPI()
 
+app.include_router(forms_router, prefix="/api/forms")
 app.include_router(user_router, prefix="/api/users")
 app.include_router(main_router, prefix="/api")
 
