@@ -21,6 +21,13 @@ To develop the code, run
 pip install -e .[dev]
 ```
 
+## Run demos locally
+
+```bash
+# FastUI
+uvicorn aind_data_transfer_ui_demo.fast_ui.server:app --host 0.0.0.0 --port 8000 --reload
+```
+
 ## Contributing
 
 ### Linters and testing

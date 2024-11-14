@@ -2,11 +2,16 @@ from collections import defaultdict
 from typing import Annotated, Literal, TypeAlias
 
 import requests
+from aind_data_transfer_models.core import (
+    BasicUploadJobConfigs,
+    SubmitJobRequest,
+)
 from fastapi import APIRouter, Request
 from fastui import AnyComponent, FastUI
 from fastui import components as c
 from fastui.events import PageEvent
 from fastui.forms import SelectSearchResponse, fastui_form
+
 from aind_data_transfer_ui_demo.fast_ui.shared import page
 from aind_data_transfer_ui_demo.models.simple import LoginForm, SelectForm
 
@@ -15,6 +20,8 @@ from aind_data_transfer_ui_demo.models.simple import LoginForm, SelectForm
 router = APIRouter()
 FormType: TypeAlias = Literal[
     'login', 'select',
+    # Attempt to render full versions (unchanged from aind-data-transfer-models)
+    'BasicUploadJobConfigs', 'SubmitJobRequest',
 ]
 
 @router.get('/search', response_model=SelectSearchResponse)
@@ -58,6 +65,17 @@ def forms_view(form_type: FormType) -> list[AnyComponent]:
                     on_click=PageEvent(name='change-form', push_path='/forms/select', context={'form_type': 'select'}),
                     active='/forms/select',
                 ),
+                # Attempt to render full versions (unchanged from aind-data-transfer-models)
+                c.Link(
+                    components=[c.Text(text='BasicUploadJobConfigs')],
+                    on_click=PageEvent(name='change-form', push_path='/forms/BasicUploadJobConfigs', context={'form_type': 'BasicUploadJobConfigs'}),
+                    active='/forms/BasicUploadJobConfigs',
+                ),
+                c.Link(
+                    components=[c.Text(text='Job Request Form')],
+                    on_click=PageEvent(name='change-form', push_path='/forms/SubmitJobRequest', context={'form_type': 'SubmitJobRequest'}),
+                    active='/forms/SubmitJobRequest',
+                ),
             ],
             mode='tabs',
             class_name='+ mb-4',
@@ -88,6 +106,19 @@ def form_content(form_type: FormType):
                 c.Paragraph(text='Form showing different ways of doing select.'),
                 c.ModelForm(model=SelectForm, display_mode='page', submit_url='/api/forms/select'),
             ]
+        # Attempt to render full versions (unchanged from aind-data-transfer-models)
+        case 'BasicUploadJobConfigs':
+            return [
+                c.Heading(text='BasicUploadJobConfigs', level=2),
+                c.Paragraph(text='Full model from aind-data-transfer-models.'),
+                c.ModelForm(model=BasicUploadJobConfigs, display_mode='page', submit_url='/api/forms/BasicUploadJobConfigs'),
+            ]
+        case 'SubmitJobRequest':
+            return [
+                c.Heading(text='SubmitJobRequest', level=2),
+                c.Paragraph(text='Full model from aind-data-transfer-models.'),
+                c.ModelForm(model=SubmitJobRequest, display_mode='page', submit_url='/api/forms/SubmitJobRequest'),
+            ]
         case _:
             raise ValueError(f'Unknown form form_type: {form_type}')
 
@@ -102,6 +133,19 @@ async def login_form_post(form: Annotated[LoginForm, fastui_form(LoginForm)]):
 async def select_form_post(form: Annotated[SelectForm, fastui_form(SelectForm)]):
     print(form)
     form_json = form.model_dump_json( indent=3)
+    return display_submitted_form_data(form_json)
+
+# Attempt to submit full versions (unchanged from aind-data-transfer-models)
+@router.post('/BasicUploadJobConfigs', response_model=FastUI, response_model_exclude_none=True)
+async def basic_upload_job_configs_form_post(form: Annotated[BasicUploadJobConfigs, fastui_form(BasicUploadJobConfigs)]):
+    print(form)
+    form_json = form.model_dump_json(indent=3)
+    return display_submitted_form_data(form_json)
+
+@router.post('/SubmitJobRequest', response_model=FastUI, response_model_exclude_none=True)
+async def SubmitJobRequest_form_post(form: Annotated[SubmitJobRequest, fastui_form(SubmitJobRequest)]):
+    print(form)
+    form_json = form.model_dump_json(indent=3)
     return display_submitted_form_data(form_json)
 
 def display_submitted_form_data(form_json: str, extra_json=None) -> list[AnyComponent]:
