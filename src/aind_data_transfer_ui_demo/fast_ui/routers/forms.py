@@ -15,6 +15,7 @@ from fastui.forms import SelectSearchResponse, fastui_form
 from aind_data_transfer_ui_demo.fast_ui.shared import page
 from aind_data_transfer_ui_demo.models.simple import LoginForm, SelectForm
 from aind_data_transfer_ui_demo.models.modality_configs import ModalityConfigsFastUI
+from aind_data_transfer_ui_demo.models.basic_upload_job_configs import BasicUploadJobConfigsFastUI
 
 ## FORMS #######################
 router = APIRouter()
@@ -22,6 +23,7 @@ FormType: TypeAlias = Literal[
     'login', 'select',
     # Attempt to render trimmed versions
     'ModalityConfigsFastUI',
+    'BasicUploadJobConfigsFastUI',
     # Attempt to render full versions (unchanged from aind-data-transfer-models)
     'BasicUploadJobConfigs', 'SubmitJobRequest',
 ]
@@ -73,6 +75,11 @@ def forms_view(form_type: FormType) -> list[AnyComponent]:
                     on_click=PageEvent(name='change-form', push_path='/forms/ModalityConfigsFastUI', context={'form_type': 'ModalityConfigsFastUI'}),
                     active='/forms/ModalityConfigsFastUI',
                 ),
+                c.Link(
+                    components=[c.Text(text='BasicUploadJobConfigs (min)')],
+                    on_click=PageEvent(name='change-form', push_path='/forms/BasicUploadJobConfigsFastUI', context={'form_type': 'BasicUploadJobConfigsFastUI'}),
+                    active='/forms/BasicUploadJobConfigsFastUI',
+                ),
                 # Attempt to render full versions (unchanged from aind-data-transfer-models)
                 c.Link(
                     components=[c.Text(text='BasicUploadJobConfigs (full)')],
@@ -121,6 +128,12 @@ def form_content(form_type: FormType):
                 c.Paragraph(text='Form for creating modality configs (does not contain all fields in ModalityConfigs).'),
                 c.ModelForm(model=ModalityConfigsFastUI, display_mode='page', submit_url='/api/forms/ModalityConfigsFastUI'),
             ]
+        case 'BasicUploadJobConfigsFastUI':
+            return [
+                c.Heading(text='BasicUploadJobConfigs (min)', level=2),
+                c.Paragraph(text='Form for creating basic upload job configs (does not contain all fields in BasicUploadJobConfigs).'),
+                c.ModelForm(model=BasicUploadJobConfigsFastUI, display_mode='page', submit_url='/api/forms/BasicUploadJobConfigsFastUI'),
+            ]
         # Attempt to render full versions (unchanged from aind-data-transfer-models)
         case 'BasicUploadJobConfigs':
             return [
@@ -160,6 +173,17 @@ async def modality_configs_fast_ui_form_post(form: Annotated[ModalityConfigsFast
     except Exception as e:
         print(repr(e))
     return display_submitted_form_data(form_json, submit_json)
+
+@router.post('/BasicUploadJobConfigsFastUI', response_model=FastUI, response_model_exclude_none=True)
+async def basic_upload_job_configs_fast_ui_form_post(form: Annotated[BasicUploadJobConfigsFastUI, fastui_form(BasicUploadJobConfigsFastUI)]):
+    form_json = form.model_dump_json(indent=3)
+    submit_json = None
+    try:
+        submit_json = form.process_and_validate_form_data()
+    except Exception as e:
+        print(repr(e))
+    return display_submitted_form_data(form_json, submit_json)
+
 # Attempt to submit full versions (unchanged from aind-data-transfer-models)
 @router.post('/BasicUploadJobConfigs', response_model=FastUI, response_model_exclude_none=True)
 async def basic_upload_job_configs_form_post(form: Annotated[BasicUploadJobConfigs, fastui_form(BasicUploadJobConfigs)]):
