@@ -19,6 +19,8 @@ This repo contains demos to evaluate use of FastUI and other pydantic forms gene
 To develop the code, run
 ```bash
 pip install -e .[dev]
+# most recent version of streamlit_pydantic (supporting pydantic v2) is not available on PyPI
+pip install 'git+https://github.com/LukasMasuch/streamlit-pydantic.git@main'
 ```
 
 ## Run demos locally
@@ -26,6 +28,8 @@ pip install -e .[dev]
 ```bash
 # FastUI
 uvicorn aind_data_transfer_ui_demo.fast_ui.server:app --host 0.0.0.0 --port 8000 --reload
+# Streamlit-pydantic
+streamlit run src/aind_data_transfer_ui_demo/streamlit_pydantic/demo.py
 ```
 
 ### FastUI
@@ -60,12 +64,26 @@ Fields that cannot be handed from aind-data-transfer-models:
     - upload_jobs list changed to single upload_job
 
 Next steps:
+- format form wider
 - figure out how to attach multiple modalities, upload_jobs
 - post form submission to aind-data-transfer-service
 - refactor aind-data-transfer-service to FastAPI
 - integrate fastui job form + submission
 - implement nav bar in fastui
 - implement jobs status page in fast ui
+
+### Streamlit-pydantic
+
+Pros:
+- supports lists, dicts, nested models
+- UI is very easy to build
+- UI still renders base form even if there are issues
+
+Cons:
+- Does not support Optional fields
+- Latest version is NOT on PyPI
+- limited support for pydantic v2, buggy
+- integration with current REST service
 
 ### Json Editor
 

@@ -2,6 +2,7 @@
 
 Minimal version of ModalityConfigs from aind-data-transfer-models
 
+#### FastUI
 Summary fields that cannot be handled:
 - job_settings: Optional[dict]
 - slurm_settings: Optional[V0036JobProperties]
@@ -31,6 +32,8 @@ Unchanged:
 Added:
 - process_and_validate_form_data(): validates with aind-data-transfer-models
 
+#### Streamlit Pydantic
+- Additionally remove optional fields
 """
 
 import json
@@ -105,3 +108,20 @@ class ModalityConfigsFastUI(BaseModel):
         validated_model = ModalityConfigs(**form_data)
         # return the validated model as a json string
         return validated_model.model_dump_json(indent=3)
+
+class ModalityConfigsStreamlit(ModalityConfigsFastUI):
+    """Minimal version of ModalityConfigs from aind-data-transfer-models"""
+    # change any optional fields to required fields
+    compress_raw_data: bool = Field(
+        default=None,
+        description="Run compression on data",
+        title="Compress Raw Data",
+        validate_default=True,
+    )
+    extra_configs: str = Field(
+        default=None,
+        description=(
+            "Location of additional configuration file for compression job."
+        ),
+        title="Extra Configs",
+    )

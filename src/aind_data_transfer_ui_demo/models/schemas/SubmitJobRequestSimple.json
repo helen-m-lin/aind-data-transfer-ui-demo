@@ -241,14 +241,14 @@
    },
    "description": "Minimal version of SubmitJobRequest from aind-data-transfer-models.\nCombines fields from SubmitJobRequest and parent S3UploadSubmitJobRequest",
    "properties": {
-      "upload_job": {
+      "upload_jobs": {
          "description": "Upload job to process",
          "items": {
             "$ref": "#/$defs/BasicUploadJobConfigsSimple"
          },
          "maxItems": 1000,
          "minItems": 1,
-         "title": "Upload Job",
+         "title": "Upload Jobs",
          "type": "array"
       },
       "user_email": {
@@ -279,7 +279,7 @@
       }
    },
    "required": [
-      "upload_job"
+      "upload_jobs"
    ],
    "title": "SubmitJobRequestSimple",
    "type": "object"

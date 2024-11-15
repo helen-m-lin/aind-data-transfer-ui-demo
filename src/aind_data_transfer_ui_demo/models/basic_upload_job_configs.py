@@ -2,6 +2,7 @@
 
 Minimal version of BasicUploadJobConfigs from aind-data-transfer-models
 
+#### FastUI
 Summary fields that cannot be handled:
 - metadata_configs: Optional[GatherMetadataJobSettings]
 - trigger_capsule_configs: Optional[TriggerConfigModel]
@@ -56,6 +57,9 @@ Added:
 - _process_form_data(): converts single modality to list
 - process_and_validate_form_data(): validates with aind-data-transfer-models
 
+#### Streamlit Pydantic
+- Additionally remove optional fields
+
 """
 
 import json
@@ -72,6 +76,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from aind_data_transfer_ui_demo.models.modality_configs import (
     ModalityConfigsFastUI,
+    ModalityConfigsStreamlit,
 )
 
 # NOTE: FastUI requires enums for dropdowns, cannot use Platform.ONE_OF
@@ -345,4 +350,42 @@ class BasicUploadJobConfigsSimple(BaseModel):
             "Force syncing of data folder even if location exists in cloud"
         ),
         title="Force Cloud Sync",
+    )
+
+
+class BasicUploadJobConfigsStreamlit(BasicUploadJobConfigsSimple):
+    """Minimal version of BasicUploadJobConfigs from aind-data-transfer-models"""
+    # change any optional fields to required fields
+    user_email: EmailStr = Field(
+        default=None,
+        description=(
+            "Optional email address to receive job status notifications"
+        ),
+    )
+    email_notification_types: Set[EmailNotificationType] = Field(
+        default=None,
+        description=(
+            "Types of job statuses to receive email notifications about"
+        ),
+    )
+    input_data_mount: str = Field(
+        default=None,
+        description="(deprecated - set codeocean_configs)",
+        title="Input Data Mount",
+    )
+    process_capsule_id: str = Field(
+        None,
+        description="(deprecated - set codeocean_configs)",
+        title="Process Capsule ID",
+    )
+    modalities: List[ModalityConfigsStreamlit] = Field(
+        ...,
+        description="Data collection modalities and their directory location",
+        title="Modalities",
+        min_items=1,
+    )
+    metadata_dir: str = Field(
+        default=None,
+        description="Directory of metadata",
+        title="Metadata Directory",
     )

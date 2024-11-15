@@ -2,6 +2,7 @@
 
 Minimal version of SubmitJobRequest from aind-data-transfer-models
 
+### FastUI
 Summary fields that cannot be handled:
 - upload_jobs list changed to single upload_job
 
@@ -24,6 +25,9 @@ Added:
 - _process_form_data(): converts single upload_job to list, also processes upload_job
 - process_and_validate_form_data(): validates with aind-data-transfer-models
 
+#### Streamlit Pydantic
+- Additionally remove optional fields
+
 """
 
 import json
@@ -45,6 +49,7 @@ from pydantic import (
 from aind_data_transfer_ui_demo.models.basic_upload_job_configs import (
     BasicUploadJobConfigsFastUI,
     BasicUploadJobConfigsSimple,
+    BasicUploadJobConfigsStreamlit,
 )
 
 
@@ -146,7 +151,7 @@ class SubmitJobRequestSimple(BaseModel):
         
     # )
     # NOTE: converted to use List[BasicUploadJobConfigsSimple] instead of List[BasicUploadJobConfigs]
-    upload_job: List[BasicUploadJobConfigsSimple] = Field(
+    upload_jobs: List[BasicUploadJobConfigsSimple] = Field(
         ...,
         description="Upload job to process",
         min_items=1,
@@ -168,3 +173,26 @@ class SubmitJobRequestSimple(BaseModel):
             "Types of job statuses to receive email notifications about"
         ),
     )
+
+class SubmitJobRequestStreamlit(SubmitJobRequest):
+    """Minimal version of SubmitJobRequest from aind-data-transfer-models.
+    Combines fields from SubmitJobRequest and parent S3UploadSubmitJobRequest
+    """
+    job_type: str = Field(
+        default="s3_upload",
+        description="Job type",
+        readOnly=True,
+    )
+    upload_jobs: List[BasicUploadJobConfigsStreamlit] = Field(
+        ...,
+        description="Upload job to process",
+        min_items=1,
+        max_items=1000,
+    )
+    user_email: EmailStr = Field(
+        default=None,
+        description=(
+            "Optional email address to receive job status notifications"
+        ),
+    )
+    
