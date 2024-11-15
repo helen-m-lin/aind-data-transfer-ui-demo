@@ -9,17 +9,19 @@ from aind_data_transfer_models.core import (
 from fastapi import APIRouter, Request
 from fastui import AnyComponent, FastUI
 from fastui import components as c
-from fastui.events import PageEvent
+from fastui.events import GoToEvent, PageEvent
 from fastui.forms import SelectSearchResponse, fastui_form
 
 from aind_data_transfer_ui_demo.fast_ui.shared import page
 from aind_data_transfer_ui_demo.models.simple import LoginForm, SelectForm
-
+from aind_data_transfer_ui_demo.models.modality_configs import ModalityConfigsFastUI
 
 ## FORMS #######################
 router = APIRouter()
 FormType: TypeAlias = Literal[
     'login', 'select',
+    # Attempt to render trimmed versions
+    'ModalityConfigsFastUI',
     # Attempt to render full versions (unchanged from aind-data-transfer-models)
     'BasicUploadJobConfigs', 'SubmitJobRequest',
 ]
@@ -65,14 +67,20 @@ def forms_view(form_type: FormType) -> list[AnyComponent]:
                     on_click=PageEvent(name='change-form', push_path='/forms/select', context={'form_type': 'select'}),
                     active='/forms/select',
                 ),
+                # Attempt to render trimmed versions
+                c.Link(
+                    components=[c.Text(text='ModalityConfigsFastUI (min)')],
+                    on_click=PageEvent(name='change-form', push_path='/forms/ModalityConfigsFastUI', context={'form_type': 'ModalityConfigsFastUI'}),
+                    active='/forms/ModalityConfigsFastUI',
+                ),
                 # Attempt to render full versions (unchanged from aind-data-transfer-models)
                 c.Link(
-                    components=[c.Text(text='BasicUploadJobConfigs')],
+                    components=[c.Text(text='BasicUploadJobConfigs (full)')],
                     on_click=PageEvent(name='change-form', push_path='/forms/BasicUploadJobConfigs', context={'form_type': 'BasicUploadJobConfigs'}),
                     active='/forms/BasicUploadJobConfigs',
                 ),
                 c.Link(
-                    components=[c.Text(text='Job Request Form')],
+                    components=[c.Text(text='Job Request Form (full)')],
                     on_click=PageEvent(name='change-form', push_path='/forms/SubmitJobRequest', context={'form_type': 'SubmitJobRequest'}),
                     active='/forms/SubmitJobRequest',
                 ),
@@ -106,23 +114,30 @@ def form_content(form_type: FormType):
                 c.Paragraph(text='Form showing different ways of doing select.'),
                 c.ModelForm(model=SelectForm, display_mode='page', submit_url='/api/forms/select'),
             ]
+        # Attempt to render trimmed versions
+        case 'ModalityConfigsFastUI':
+            return [
+                c.Heading(text='ModalityConfigs (min)', level=2),
+                c.Paragraph(text='Form for creating modality configs (does not contain all fields in ModalityConfigs).'),
+                c.ModelForm(model=ModalityConfigsFastUI, display_mode='page', submit_url='/api/forms/ModalityConfigsFastUI'),
+            ]
         # Attempt to render full versions (unchanged from aind-data-transfer-models)
         case 'BasicUploadJobConfigs':
             return [
-                c.Heading(text='BasicUploadJobConfigs', level=2),
+                c.Heading(text='BasicUploadJobConfigs (full)', level=2),
                 c.Paragraph(text='Full model from aind-data-transfer-models.'),
                 c.ModelForm(model=BasicUploadJobConfigs, display_mode='page', submit_url='/api/forms/BasicUploadJobConfigs'),
             ]
         case 'SubmitJobRequest':
             return [
-                c.Heading(text='SubmitJobRequest', level=2),
+                c.Heading(text='SubmitJobRequest (full)', level=2),
                 c.Paragraph(text='Full model from aind-data-transfer-models.'),
                 c.ModelForm(model=SubmitJobRequest, display_mode='page', submit_url='/api/forms/SubmitJobRequest'),
             ]
         case _:
             raise ValueError(f'Unknown form form_type: {form_type}')
 
-# Submit actions for each form
+# POST METHODS for Submit actions for each form ############################
 @router.post('/login', response_model=FastUI, response_model_exclude_none=True)
 async def login_form_post(form: Annotated[LoginForm, fastui_form(LoginForm)]):
     print(form)
@@ -135,6 +150,16 @@ async def select_form_post(form: Annotated[SelectForm, fastui_form(SelectForm)])
     form_json = form.model_dump_json( indent=3)
     return display_submitted_form_data(form_json)
 
+# Attempt to submit trimmed versions (validates with full version from aind-data-transfer-models)
+@router.post('/ModalityConfigsFastUI', response_model=FastUI, response_model_exclude_none=True)
+async def modality_configs_fast_ui_form_post(form: Annotated[ModalityConfigsFastUI, fastui_form(ModalityConfigsFastUI)]):
+    form_json = form.model_dump_json(indent=3)
+    submit_json = None
+    try:
+        submit_json = form.process_and_validate_form_data()
+    except Exception as e:
+        print(repr(e))
+    return display_submitted_form_data(form_json, submit_json)
 # Attempt to submit full versions (unchanged from aind-data-transfer-models)
 @router.post('/BasicUploadJobConfigs', response_model=FastUI, response_model_exclude_none=True)
 async def basic_upload_job_configs_form_post(form: Annotated[BasicUploadJobConfigs, fastui_form(BasicUploadJobConfigs)]):
@@ -143,16 +168,24 @@ async def basic_upload_job_configs_form_post(form: Annotated[BasicUploadJobConfi
     return display_submitted_form_data(form_json)
 
 @router.post('/SubmitJobRequest', response_model=FastUI, response_model_exclude_none=True)
-async def SubmitJobRequest_form_post(form: Annotated[SubmitJobRequest, fastui_form(SubmitJobRequest)]):
+async def submit_job_request_form_post(form: Annotated[SubmitJobRequest, fastui_form(SubmitJobRequest)]):
     print(form)
     form_json = form.model_dump_json(indent=3)
     return display_submitted_form_data(form_json)
 
-def display_submitted_form_data(form_json: str, extra_json=None) -> list[AnyComponent]:
+# Helper methods ###########################################################
+def display_submitted_form_data(form_json: str, submit_json=None) -> list[AnyComponent]:
     """Displays the submitted form data back to user"""
-    return [
+    components = [
         c.Paragraph(text=f'Submitted form content!'),
-        c.Heading(text='Form Data:', level=3),
+        c.Heading(text='Form data:', level=3),
         c.Code(language='json', text=form_json),
-        c.Code(language='json', text=extra_json or ''),
     ]
+    if submit_json is not None:
+        components.extend([
+            c.Heading(text='Submit to server (validated using aind-data-transfer-models):', level=3),
+            c.Code(language='json', text=submit_json),
+            # TODO: submit to aind-data-transfer-service
+            c.Button(text='Submit', on_click=GoToEvent(url='/')),
+        ])
+    return components
