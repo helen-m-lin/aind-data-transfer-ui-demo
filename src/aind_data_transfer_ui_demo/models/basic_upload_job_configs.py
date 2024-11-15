@@ -81,26 +81,43 @@ PlatformEnum = Enum("PlatformType", BasicUploadJobConfigs._PLATFORM_MAP)
 class BasicUploadJobConfigsFastUI(BaseModel):
     """Minimal version of BasicUploadJobConfigs from aind-data-transfer-models"""
 
+    # NOTE: use BaseModel instead of BaseSettings
+    # model_config = ConfigDict(use_enum_values=True, extra="allow")
+    # NOTE: created global PlatformEnum instead
+    # _PLATFORM_MAP: ClassVar = {
+    #     p().abbreviation.upper(): p().abbreviation for p in Platform.ALL
+    # }
+    # NOTE: Only used in custom validator
+    # _DATETIME_PATTERN1: ClassVar = re.compile(
+    #     r"^\d{4}-\d{2}-\d{2}[ |T]\d{2}:\d{2}:\d{2}$"
+    # )
+    # _DATETIME_PATTERN2: ClassVar = re.compile(
+    #     r"^\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2} [APap][Mm]$"
+    # )
     user_email: Optional[EmailStr] = Field(
         default=None,
         description=(
             "Optional email address to receive job status notifications"
         ),
     )
+    # NOTE: requires field_validator or 422 Unprocessable Entity when select only one
     email_notification_types: Optional[Set[EmailNotificationType]] = Field(
         default=None,
         description=(
             "Types of job statuses to receive email notifications about"
         ),
     )
+    # TODO: can eventually use /search api to fill this in
     project_name: str = Field(
         ..., description="Name of project", title="Project Name"
     )
+    # TODO: if deprecated, can probably remove from UI
     input_data_mount: Optional[str] = Field(
         default=None,
         description="(deprecated - set codeocean_configs)",
         title="Input Data Mount",
     )
+    # TODO: if deprecated, can probably remove from UI
     process_capsule_id: Optional[str] = Field(
         None,
         description="(deprecated - set codeocean_configs)",
@@ -117,9 +134,11 @@ class BasicUploadJobConfigsFastUI(BaseModel):
         ),
         title="S3 Bucket",
     )
+    # NOTE: uses PlatformEnum instead of Platform.ONE_OF
     platform: PlatformEnum = Field(
         ..., description="Platform", title="Platform"
     )
+    # NOTE: NotImplementedError: Array fields are not fully supported, see https://github.com/pydantic/FastUI/pull/52
     # NOTE: converted to use ModalityConfigsFastUI instead of List[ModalityConfigs]
     modality: ModalityConfigsFastUI = Field(
         ...,
@@ -132,6 +151,7 @@ class BasicUploadJobConfigsFastUI(BaseModel):
         description="Datetime data was acquired",
         title="Acquisition Datetime",
     )
+    # NOTE: had to convert to str from PurePosixPath
     metadata_dir: Optional[str] = Field(
         default=None,
         description="Directory of metadata",
@@ -152,6 +172,56 @@ class BasicUploadJobConfigsFastUI(BaseModel):
         ),
         title="Force Cloud Sync",
     )
+    # NOTE: Cannot render GatherMetadataJobSettings, too nested to flatten out
+    # metadata_configs: Optional[GatherMetadataJobSettings] = Field(
+    #     default=None,
+    #     description="Settings for gather metadata job",
+    #     title="Metadata Configs",
+    #     validate_default=True,
+    # )
+    # NOTE: Cannot render TriggerConfigModel, deprecated anyway
+    # trigger_capsule_configs: Optional[TriggerConfigModel] = Field(
+    #     default=None,
+    #     description=(
+    #         "(deprecated. Use codeocean_configs) Settings for the codeocean "
+    #         "trigger capsule. Validators will set defaults."
+    #     ),
+    #     title="Trigger Capsule Configs (deprecated. Use codeocean_configs)",
+    #     validate_default=True,
+    # )
+    # NOTE: Cannot render CodeOceanPipelineMonitorConfigs
+    # TODO: can consider adding some default values/flattening out
+    # codeocean_configs: CodeOceanPipelineMonitorConfigs = Field(
+    #     default=CodeOceanPipelineMonitorConfigs(),
+    #     description=(
+    #         "User can pass custom fields. Otherwise, transfer service will "
+    #         "handle setting default values at runtime."
+    #     ),
+    # )
+
+    # NOTE: this is not an issue anymore?
+    # TODO: Fast UI formats datetime as '%Y-%m-%d %H:%M'
+    # Misses ss contents: https://github.com/pydantic/FastUI/issues/333
+    # @field_validator("acq_datetime", mode="before")
+    # def _parse_datetime(cls, datetime_val: Any) -> datetime:
+    #     """Parses datetime string to %YYYY-%MM-%DD HH:mm:ss"""
+    #     print(datetime_val)
+    #     is_str = isinstance(datetime_val, str)
+    #     if is_str and re.match(
+    #         SimpleJobConfigs._DATETIME_PATTERN1, datetime_val
+    #     ):
+    #         return datetime.fromisoformat(datetime_val)
+    #     elif is_str and re.match(
+    #         SimpleJobConfigs._DATETIME_PATTERN2, datetime_val
+    #     ):
+    #         return datetime.strptime(datetime_val, "%m/%d/%Y %I:%M:%S %p")
+    #     elif is_str:
+    #         raise ValueError(
+    #             "Incorrect datetime format, should be"
+    #             " YYYY-MM-DD HH:mm:ss or MM/DD/YYYY I:MM:SS P"
+    #         )
+    #     else:
+    #         return datetime_val
 
     # FastUI bug where single select is not converted to list
     # NOTE: this needs to be added to any field that is a list

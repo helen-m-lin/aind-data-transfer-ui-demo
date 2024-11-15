@@ -8,7 +8,9 @@ APP_READTHEDOCS_URL = "https://aind-data-transfer-service.readthedocs.io"
 APP_GITHUB_URL = (
     "https://github.com/AllenNeuralDynamics/aind-data-transfer-service"
 )
-AIND_METADATA_SERVICE_PROJECT_NAMES_URL = "http://aind-metadata-service/project_names"
+AIND_METADATA_SERVICE_PROJECT_NAMES_URL = (
+    "http://aind-metadata-service/project_names"
+)
 
 
 def page(
@@ -69,6 +71,7 @@ def page(
             ),
         ],
     )
+    # NOTE: this may crowd the page, consider removing
     footer = c.Footer(
         extra_text=APP_TITLE,
         links=[

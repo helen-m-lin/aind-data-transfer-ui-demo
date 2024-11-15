@@ -28,6 +28,46 @@ pip install -e .[dev]
 uvicorn aind_data_transfer_ui_demo.fast_ui.server:app --host 0.0.0.0 --port 8000 --reload
 ```
 
+### FastUI
+
+Overall limitations:
+- Does not support: dict, complex list, PurePosixPath, .ONE_OF, and other complex types
+- Need FastAPI infrastructure (currently Starlette)
+- UI components relatively straightforward, but can get lengthy
+- occasionally buggy/ lack of support
+    - e.g. bug with list select multiple requires custom field_validator for all lists
+
+
+To handle limitations:
+1. Convert models from aind-data-transfer-models to minified models.
+    - Minified models can have simple type and custom validators.
+    - Remove field_validators, model_validators, complex types
+    - Convert to BaseModel instead of BaseSettings
+    - Take all fields from original model and any parent models
+2. Add methods to convert submitted formdata into original aind-data-transfer-models
+    - converts flattened fields back to original lists
+
+Fields that cannot be handed from aind-data-transfer-models:
+- ModalityConfigs:
+    - job_settings: Optional[dict]
+    - slurm_settings: Optional[V0036JobProperties]
+- BasicUploadJobConfigs:
+    - metadata_configs: Optional[GatherMetadataJobSettings]
+    - trigger_capsule_configs: Optional[TriggerConfigModel]
+    - codeocean_configs: CodeOceanPipelineMonitorConfigs
+    - modalities list changed to single modality
+- SubmitJobRequest:
+    - upload_jobs list changed to single upload_job
+
+Next steps:
+- figure out how to attach multiple modalities, upload_jobs
+- post form submission to aind-data-transfer-service
+- refactor aind-data-transfer-service to FastAPI
+- integrate fastui job form + submission
+- implement nav bar in fastui
+- implement jobs status page in fast ui
+
+
 ## Contributing
 
 ### Linters and testing

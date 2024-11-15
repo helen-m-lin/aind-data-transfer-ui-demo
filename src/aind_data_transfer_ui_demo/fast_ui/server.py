@@ -2,11 +2,12 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import HTMLResponse
 from fastui import AnyComponent, FastUI, prebuilt_html
 
-from aind_data_transfer_ui_demo.fast_ui.routers.forms import router as forms_router
+from aind_data_transfer_ui_demo.fast_ui.routers.forms import (
+    router as forms_router,
+)
 from aind_data_transfer_ui_demo.fast_ui.routers.users import (
     router as user_router,
 )
-
 from aind_data_transfer_ui_demo.fast_ui.shared import APP_TITLE, page
 
 # MAIN #######################
@@ -41,5 +42,4 @@ app.include_router(main_router, prefix="/api")
 @app.get("/{path:path}")
 async def html_landing() -> HTMLResponse:
     """Simple HTML page which serves the React app, comes last as it matches all paths."""
-    print("html_landing")
     return HTMLResponse(prebuilt_html(title=APP_TITLE))

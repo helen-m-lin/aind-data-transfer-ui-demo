@@ -19,7 +19,6 @@ Changes:
     - @field_validator:
         - @field_validator("modality", mode="before")
         - @field_validator("compress_raw_data", mode="after")
-            - TODO: bool defaults to False, so we must handle ECEPHYS default manually!
     - @model_validator:
         - check_computed_field
         - check_modality_configs
@@ -47,9 +46,18 @@ ModalityEnum = Enum("ModalityType", ModalityConfigs._MODALITY_MAP)
 class ModalityConfigsFastUI(BaseModel):
     """Minimal version of ModalityConfigs from aind-data-transfer-models"""
 
+    # NOTE: use BaseModel instead of BaseSettings
+    # model_config = ConfigDict(extra="allow")
+    # NOTE: created global ModalityEnum instead
+    # _MODALITY_MAP: ClassVar = {
+    #     m().abbreviation.upper().replace("-", "_"): m().abbreviation
+    #     for m in Modality.ALL
+    # }
+    # NOTE: uses ModalityEnum instead of Modality.ONE_OF
     modality: ModalityEnum = Field(
         ..., description="Data collection modality", title="Modality"
     )
+    # NOTE: had to convert to str from PurePosixPath
     source: str = Field(
         ...,
         description="Location of raw data to be uploaded",
@@ -61,6 +69,7 @@ class ModalityConfigsFastUI(BaseModel):
         title="Compress Raw Data",
         validate_default=True,
     )
+    # NOTE: had to convert to str from PurePosixPath
     extra_configs: Optional[str] = Field(
         default=None,
         description=(
@@ -68,6 +77,25 @@ class ModalityConfigsFastUI(BaseModel):
         ),
         title="Extra Configs",
     )
+    # NOTE: cannot render dict
+    # job_settings: Optional[dict] = Field(
+    #     default=None,
+    #     description=(
+    #         "Configs to pass into modality compression job. Must be json "
+    #         "serializable."
+    #     ),
+    #     title="Job Settings",
+    # )
+    # NOTE: cannot render V0036JobProperties
+    # slurm_settings: Optional[V0036JobProperties] = Field(
+    #     default=None,
+    #     description=(
+    #         "Custom slurm job properties. `environment` is a required field. "
+    #         "Please set it to an empty dictionary. A downstream process will "
+    #         "overwrite it."
+    #     ),
+    #     title="Slurm Settings",
+    # )
 
     def process_and_validate_form_data(self) -> str:
         """Tries to create aind-data-transfer-models from the submitted data.

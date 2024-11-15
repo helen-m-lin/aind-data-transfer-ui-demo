@@ -52,6 +52,15 @@ class SubmitJobRequestFastUI(BaseModel):
     """
     
     # S3UploadSubmitJobRequest
+    # NOTE: use BaseModel instead of BaseSettings
+    # model_config = ConfigDict(use_enum_values=True, extra="allow")
+    # NOTE: removed since it should be a constant
+    # job_type: Optional[str] = Field(
+    #     default="transform_and_upload",
+    #     description="Optional tag. Will be made Literal in future versions.",
+        
+    # )
+    # NOTE: NotImplementedError: Array fields are not fully supported, see https://github.com/pydantic/FastUI/pull/52
     # NOTE: converted to use BasicUploadJobConfigsFastUI instead of List[BasicUploadJobConfigs]
     upload_job: BasicUploadJobConfigsFastUI = Field(
         ...,
@@ -59,6 +68,8 @@ class SubmitJobRequestFastUI(BaseModel):
     )
 
     # S3UploadSubmitJobRequest
+    # NOTE: overwritten in SubmitJobRequest
+    # job_type: Literal["s3_upload"] = "s3_upload"
     user_email: Optional[EmailStr] = Field(
         default=None,
         description=(
@@ -72,6 +83,13 @@ class SubmitJobRequestFastUI(BaseModel):
             "Types of job statuses to receive email notifications about"
         ),
     )
+    # NOTE: overwritten in SubmitJobRequest
+    # upload_jobs: List[S3UploadJobConfigs] = Field(
+    #     ...,
+    #     description="List of upload jobs to process. Max of 20 at a time.",
+    #     min_items=1,
+    #     max_items=100,
+    # )
 
 
     # FastUI bug where single select is not converted to list
