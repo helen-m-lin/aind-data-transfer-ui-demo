@@ -61,7 +61,7 @@ Added:
 import json
 from datetime import datetime
 from enum import Enum
-from typing import Literal, Optional, Set
+from typing import List, Literal, Optional, Set
 
 from aind_data_transfer_models.core import BasicUploadJobConfigs
 from aind_data_transfer_models.s3_upload_configs import (
@@ -252,3 +252,97 @@ class BasicUploadJobConfigsFastUI(BaseModel):
         validated_model = BasicUploadJobConfigs(**processed_form_data)
         # return the validated model as a json string
         return validated_model.model_dump_json(indent=3)
+
+class BasicUploadJobConfigsSimple(BaseModel):
+    """Minimal version of BasicUploadJobConfigs from aind-data-transfer-models"""
+
+    # NOTE: use BaseModel instead of BaseSettings
+    # model_config = ConfigDict(use_enum_values=True, extra="allow")
+    # NOTE: created global PlatformEnum instead
+    # _PLATFORM_MAP: ClassVar = {
+    #     p().abbreviation.upper(): p().abbreviation for p in Platform.ALL
+    # }
+    # NOTE: Only used in custom validator
+    # _DATETIME_PATTERN1: ClassVar = re.compile(
+    #     r"^\d{4}-\d{2}-\d{2}[ |T]\d{2}:\d{2}:\d{2}$"
+    # )
+    # _DATETIME_PATTERN2: ClassVar = re.compile(
+    #     r"^\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2} [APap][Mm]$"
+    # )
+    user_email: Optional[EmailStr] = Field(
+        default=None,
+        description=(
+            "Optional email address to receive job status notifications"
+        ),
+    )
+    email_notification_types: Optional[Set[EmailNotificationType]] = Field(
+        default=None,
+        description=(
+            "Types of job statuses to receive email notifications about"
+        ),
+    )
+    # TODO: can eventually use /search api to fill this in
+    project_name: str = Field(
+        ..., description="Name of project", title="Project Name"
+    )
+    # TODO: if deprecated, can probably remove from UI
+    input_data_mount: Optional[str] = Field(
+        default=None,
+        description="(deprecated - set codeocean_configs)",
+        title="Input Data Mount",
+    )
+    # TODO: if deprecated, can probably remove from UI
+    process_capsule_id: Optional[str] = Field(
+        None,
+        description="(deprecated - set codeocean_configs)",
+        title="Process Capsule ID",
+    )
+    s3_bucket: Literal[
+        BucketType.PRIVATE, BucketType.OPEN, BucketType.SCRATCH
+    ] = Field(
+        BucketType.PRIVATE,
+        description=(
+            "Bucket where data will be uploaded. If null, will upload to "
+            "default bucket. Uploading to scratch will be deprecated in "
+            "future versions."
+        ),
+        title="S3 Bucket",
+    )
+    # NOTE: uses PlatformEnum instead of Platform.ONE_OF
+    platform: PlatformEnum = Field(
+        ..., description="Platform", title="Platform"
+    )
+    # NOTE: converted to use List[ModalityConfigsFastUI] instead of List[ModalityConfigs]
+    modalities: List[ModalityConfigsFastUI] = Field(
+        ...,
+        description="Data collection modalities and their directory location",
+        title="Modalities",
+        min_items=1,
+    )
+    subject_id: str = Field(..., description="Subject ID", title="Subject ID")
+    acq_datetime: datetime = Field(
+        ...,
+        description="Datetime data was acquired",
+        title="Acquisition Datetime",
+    )
+    # NOTE: had to convert to str from PurePosixPath
+    metadata_dir: Optional[str] = Field(
+        default=None,
+        description="Directory of metadata",
+        title="Metadata Directory",
+    )
+    metadata_dir_force: bool = Field(
+        default=False,
+        description=(
+            "Whether to override metadata from service with metadata in "
+            "optional metadata directory"
+        ),
+        title="Metadata Directory Force",
+    )
+    force_cloud_sync: bool = Field(
+        default=False,
+        description=(
+            "Force syncing of data folder even if location exists in cloud"
+        ),
+        title="Force Cloud Sync",
+    )

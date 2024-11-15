@@ -67,6 +67,12 @@ Next steps:
 - implement nav bar in fastui
 - implement jobs status page in fast ui
 
+### Json Editor
+
+Demo Playground: https://json-editor.github.io/json-editor/
+
+- Can use CDN from `<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>`
+- All simplified models work in Playground, able to add nested list models.
 
 ## Contributing
 

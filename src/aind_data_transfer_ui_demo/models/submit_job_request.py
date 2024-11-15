@@ -28,6 +28,7 @@ Added:
 
 import json
 from typing import (
+    List,
     Optional,
     Set,
 )
@@ -43,6 +44,7 @@ from pydantic import (
 )
 from aind_data_transfer_ui_demo.models.basic_upload_job_configs import (
     BasicUploadJobConfigsFastUI,
+    BasicUploadJobConfigsSimple,
 )
 
 
@@ -127,3 +129,42 @@ class SubmitJobRequestFastUI(BaseModel):
         validated_model = SubmitJobRequest(**processed_form_data)
         # return the validated model as a json string
         return validated_model.model_dump_json(indent=3)
+
+
+class SubmitJobRequestSimple(BaseModel):
+    """Minimal version of SubmitJobRequest from aind-data-transfer-models.
+    Combines fields from SubmitJobRequest and parent S3UploadSubmitJobRequest
+    """
+    
+    # S3UploadSubmitJobRequest
+    # NOTE: use BaseModel instead of BaseSettings
+    # model_config = ConfigDict(use_enum_values=True, extra="allow")
+    # NOTE: removed since it should be a constant
+    # job_type: Optional[str] = Field(
+    #     default="transform_and_upload",
+    #     description="Optional tag. Will be made Literal in future versions.",
+        
+    # )
+    # NOTE: converted to use List[BasicUploadJobConfigsSimple] instead of List[BasicUploadJobConfigs]
+    upload_job: List[BasicUploadJobConfigsSimple] = Field(
+        ...,
+        description="Upload job to process",
+        min_items=1,
+        max_items=1000,
+    )
+
+    # S3UploadSubmitJobRequest
+    # NOTE: overwritten in SubmitJobRequest
+    # job_type: Literal["s3_upload"] = "s3_upload"
+    user_email: Optional[EmailStr] = Field(
+        default=None,
+        description=(
+            "Optional email address to receive job status notifications"
+        ),
+    )
+    email_notification_types: Set[EmailNotificationType] = Field(
+        default={EmailNotificationType.FAIL},
+        description=(
+            "Types of job statuses to receive email notifications about"
+        ),
+    )

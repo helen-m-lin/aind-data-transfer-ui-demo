@@ -1,0 +1,69 @@
+{
+   "$defs": {
+      "ModalityType": {
+         "enum": [
+            "behavior",
+            "behavior-videos",
+            "confocal",
+            "EMG",
+            "ecephys",
+            "fib",
+            "fMOST",
+            "icephys",
+            "ISI",
+            "MRI",
+            "merfish",
+            "pophys",
+            "slap",
+            "SPIM"
+         ],
+         "title": "ModalityType",
+         "type": "string"
+      }
+   },
+   "description": "Minimal version of ModalityConfigs from aind-data-transfer-models",
+   "properties": {
+      "modality": {
+         "$ref": "#/$defs/ModalityType",
+         "description": "Data collection modality",
+         "title": "Modality"
+      },
+      "source": {
+         "description": "Location of raw data to be uploaded",
+         "title": "Data Source",
+         "type": "string"
+      },
+      "compress_raw_data": {
+         "anyOf": [
+            {
+               "type": "boolean"
+            },
+            {
+               "type": "null"
+            }
+         ],
+         "default": null,
+         "description": "Run compression on data",
+         "title": "Compress Raw Data"
+      },
+      "extra_configs": {
+         "anyOf": [
+            {
+               "type": "string"
+            },
+            {
+               "type": "null"
+            }
+         ],
+         "default": null,
+         "description": "Location of additional configuration file for compression job.",
+         "title": "Extra Configs"
+      }
+   },
+   "required": [
+      "modality",
+      "source"
+   ],
+   "title": "ModalityConfigsFastUI",
+   "type": "object"
+}

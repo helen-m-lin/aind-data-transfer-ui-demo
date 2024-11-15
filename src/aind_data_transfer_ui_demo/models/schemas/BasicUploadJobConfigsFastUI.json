@@ -1,0 +1,236 @@
+{
+   "$defs": {
+      "EmailNotificationType": {
+         "description": "Types of email notifications a user can select",
+         "enum": [
+            "begin",
+            "end",
+            "fail",
+            "retry",
+            "all"
+         ],
+         "title": "EmailNotificationType",
+         "type": "string"
+      },
+      "ModalityConfigsFastUI": {
+         "description": "Minimal version of ModalityConfigs from aind-data-transfer-models",
+         "properties": {
+            "modality": {
+               "$ref": "#/$defs/ModalityType",
+               "description": "Data collection modality",
+               "title": "Modality"
+            },
+            "source": {
+               "description": "Location of raw data to be uploaded",
+               "title": "Data Source",
+               "type": "string"
+            },
+            "compress_raw_data": {
+               "anyOf": [
+                  {
+                     "type": "boolean"
+                  },
+                  {
+                     "type": "null"
+                  }
+               ],
+               "default": null,
+               "description": "Run compression on data",
+               "title": "Compress Raw Data"
+            },
+            "extra_configs": {
+               "anyOf": [
+                  {
+                     "type": "string"
+                  },
+                  {
+                     "type": "null"
+                  }
+               ],
+               "default": null,
+               "description": "Location of additional configuration file for compression job.",
+               "title": "Extra Configs"
+            }
+         },
+         "required": [
+            "modality",
+            "source"
+         ],
+         "title": "ModalityConfigsFastUI",
+         "type": "object"
+      },
+      "ModalityType": {
+         "enum": [
+            "behavior",
+            "behavior-videos",
+            "confocal",
+            "EMG",
+            "ecephys",
+            "fib",
+            "fMOST",
+            "icephys",
+            "ISI",
+            "MRI",
+            "merfish",
+            "pophys",
+            "slap",
+            "SPIM"
+         ],
+         "title": "ModalityType",
+         "type": "string"
+      },
+      "PlatformType": {
+         "enum": [
+            "behavior",
+            "confocal",
+            "ecephys",
+            "exaSPIM",
+            "FIP",
+            "HCR",
+            "HSFP",
+            "ISI",
+            "MERFISH",
+            "MRI",
+            "mesoSPIM",
+            "motor-observatory",
+            "multiplane-ophys",
+            "SLAP2",
+            "single-plane-ophys",
+            "SmartSPIM"
+         ],
+         "title": "PlatformType",
+         "type": "string"
+      }
+   },
+   "description": "Minimal version of BasicUploadJobConfigs from aind-data-transfer-models",
+   "properties": {
+      "user_email": {
+         "anyOf": [
+            {
+               "format": "email",
+               "type": "string"
+            },
+            {
+               "type": "null"
+            }
+         ],
+         "default": null,
+         "description": "Optional email address to receive job status notifications",
+         "title": "User Email"
+      },
+      "email_notification_types": {
+         "anyOf": [
+            {
+               "items": {
+                  "$ref": "#/$defs/EmailNotificationType"
+               },
+               "type": "array",
+               "uniqueItems": true
+            },
+            {
+               "type": "null"
+            }
+         ],
+         "default": null,
+         "description": "Types of job statuses to receive email notifications about",
+         "title": "Email Notification Types"
+      },
+      "project_name": {
+         "description": "Name of project",
+         "title": "Project Name",
+         "type": "string"
+      },
+      "input_data_mount": {
+         "anyOf": [
+            {
+               "type": "string"
+            },
+            {
+               "type": "null"
+            }
+         ],
+         "default": null,
+         "description": "(deprecated - set codeocean_configs)",
+         "title": "Input Data Mount"
+      },
+      "process_capsule_id": {
+         "anyOf": [
+            {
+               "type": "string"
+            },
+            {
+               "type": "null"
+            }
+         ],
+         "default": null,
+         "description": "(deprecated - set codeocean_configs)",
+         "title": "Process Capsule ID"
+      },
+      "s3_bucket": {
+         "default": "private",
+         "description": "Bucket where data will be uploaded. If null, will upload to default bucket. Uploading to scratch will be deprecated in future versions.",
+         "enum": [
+            "private",
+            "open",
+            "scratch"
+         ],
+         "title": "S3 Bucket",
+         "type": "string"
+      },
+      "platform": {
+         "$ref": "#/$defs/PlatformType",
+         "description": "Platform",
+         "title": "Platform"
+      },
+      "modality": {
+         "$ref": "#/$defs/ModalityConfigsFastUI",
+         "description": "Data collection modality and its directory location",
+         "title": "Modality"
+      },
+      "subject_id": {
+         "description": "Subject ID",
+         "title": "Subject ID",
+         "type": "string"
+      },
+      "acq_datetime": {
+         "description": "Datetime data was acquired",
+         "format": "date-time",
+         "title": "Acquisition Datetime",
+         "type": "string"
+      },
+      "metadata_dir": {
+         "anyOf": [
+            {
+               "type": "string"
+            },
+            {
+               "type": "null"
+            }
+         ],
+         "default": null,
+         "description": "Directory of metadata",
+         "title": "Metadata Directory"
+      },
+      "metadata_dir_force": {
+         "default": false,
+         "description": "Whether to override metadata from service with metadata in optional metadata directory",
+         "title": "Metadata Directory Force",
+         "type": "boolean"
+      },
+      "force_cloud_sync": {
+         "default": false,
+         "description": "Force syncing of data folder even if location exists in cloud",
+         "title": "Force Cloud Sync",
+         "type": "boolean"
+      }
+   },
+   "required": [
+      "project_name",
+      "platform",
+      "modality",
+      "subject_id",
+      "acq_datetime"
+   ],
+   "title": "BasicUploadJobConfigsFastUI",
+   "type": "object"
+}
