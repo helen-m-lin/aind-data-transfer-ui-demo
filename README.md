@@ -89,8 +89,15 @@ Cons:
 
 Demo Playground: https://json-editor.github.io/json-editor/
 
-- Can use CDN from `<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>`
+- Can use CDN
 - All simplified models work in Playground, able to add nested list models.
+- Created local demo html with customizations
+
+### Alpaca Forms
+- http://www.alpacajs.org/tutorial.html
+- Can use CDN
+- All simplified models work in Playground, able to add nested list models.
+- Created local demo html with customizations
 
 ## Contributing
 
